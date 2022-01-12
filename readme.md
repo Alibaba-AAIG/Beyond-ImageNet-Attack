@@ -35,7 +35,7 @@ The checkpoint of target model should be put into `model` folder.
 - ImageNet pre-trained models are available at [torchvision](https://pytorch.org/vision/stable/models.html) 
   
 ## Pretrained-Generators
-![framework](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/blob/master/framework.png)
+![framework](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/blob/main/framework.png)
 Adversarial generators are trained against following four ImageNet pre-trained models.
 * VGG19
 * VGG16
