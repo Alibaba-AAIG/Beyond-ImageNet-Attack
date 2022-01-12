@@ -15,7 +15,7 @@ In this paper, with only the knowledge of the ImageNet domain, we propose a Beyo
   - Pillow 6.1
 
 ## Dataset
-![images](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/blob/master/images.png)
+![images](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/blob/main/images.png)
 - Download the ImageNet training dataset.
   - [ImageNet](http://www.image-net.org/) Training Set.
 
