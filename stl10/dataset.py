@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from IPython import embed
 import os
 
-def get(batch_size, data_root='/mnt/local0/public_dataset/pytorch/', train=True, val=True, **kwargs):
+def get(batch_size, data_root='./public_dataset/pytorch', train=True, val=True, **kwargs):
     data_root = os.path.expanduser(os.path.join(data_root, 'stl10-data'))
     num_workers = kwargs.setdefault('num_workers', 1)
     kwargs.pop('input_size', None)
