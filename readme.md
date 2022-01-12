@@ -25,7 +25,7 @@ In this paper, with only the knowledge of the ImageNet domain, we propose a Beyo
   - [FGVC AirCraft](https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/)
   - CIFAR-10, CIFAR-100, STL-10 and SVHN can be automatically downloaded via `torchvision.dataset`
 
-`Note: After downloading CUB-200-2011, Standford Cars and FGVC Aircraft, you should set the "self.rawdata_root" (DCL_finegrained/config.py: lines 59-75) to your saved path.`
+Note: After downloading CUB-200-2011, Standford Cars and FGVC Aircraft, you should set the "self.rawdata_root" (DCL_finegrained/config.py: lines 59-75) to your saved path.
 
 ## Target model
 The checkpoint of target model should be put into `model` folder.
