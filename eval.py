@@ -1,70 +1,37 @@
+from DCL_finegrained import model
 import argparse
 import os
-from PIL.Image import ImagePointHandler
 import numpy as np
 import matplotlib.pyplot as plt
+from torch.autograd import Variable
 import torchvision
 import torch
 import torch.nn as nn
-import torch.optim as optim
 from torch.utils.data import DataLoader
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
+from utee import selector
 from tqdm import tqdm
-from model_layer import Vgg16_all_layer, Vgg19_all_layer,Res152_all_layer, Dense169_all_layer
-import random
-from generator import GeneratorResnet
-import os
-os.environ['CUDA_VISIBLE_DEVICES'] = '2'
+from utee.Normalize import Normalize
+from gaussian_smoothing import *
+####################################
+from loader_checkpoint import *
+os.environ["CUDA_VISIBLE_DEVICES"] = "1" 
 
-parser = argparse.ArgumentParser(description='Transfer towards Black-box Domain')
-parser.add_argument('--batch_size', type=int, default=16, help='Number of trainig samples/batch')
-parser.add_argument('--epochs', type=int, default=1, help='Number of training epochs')
-parser.add_argument('--lr', type=float, default=0.0002, help='Initial learning rate for adam')
+parser = argparse.ArgumentParser(description='Cross-Domain Transferability')
+parser.add_argument('--train_dir', default='imagenet', help='Generator Training Data: paintings, comics, ')
+parser.add_argument('--epochs', type=int, default=0, help='Which Saving Instance to Evaluate')
+parser.add_argument('--model_type', type=str, default= 'vgg16',  help ='Model against GAN is trained: vgg16, vgg19, res152, dense169')
+parser.add_argument('--target', type=int, default=-1, help='-1 if untargeted')
 parser.add_argument('--eps', type=int, default=10, help='Perturbation Budget')
-parser.add_argument('--model_type', type=str, default='vgg16',
-                    help='Model against GAN is trained: vgg16, vgg19 res152, dense169')
 parser.add_argument('--RN', type=lambda x: (str(x).lower() == 'true'), default=False, 
                     help='If true, activating the Random Normalization module in training phase')
 parser.add_argument('--DA', type=lambda x: (str(x).lower() == 'true'), default=False, 
                     help='If true, activating the Domain-agnostic Attention module in training phase')
 args = parser.parse_args()
 print(args)
-# Normalize (0-1)
-eps = args.eps/255.0
-def setup_seed(seed):
-     torch.manual_seed(seed)
-     torch.cuda.manual_seed_all(seed)
-     np.random.seed(seed)
-     random.seed(seed)
-     torch.backends.cudnn.deterministic = True
 
-setup_seed(0)
-# GPU
-# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-
-####################
-# Model
-####################
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-if args.model_type == 'vgg16':
-    model = Vgg16_all_layer.Vgg16()
-    layer_idx = 16  # Maxpooling.3
-elif args.model_type == 'vgg19':
-    model = Vgg19_all_layer.Vgg19()
-    layer_idx = 18  # Maxpooling.3
-elif args.model_type == 'res152':
-    model = Res152_all_layer.Resnet152()
-    layer_idx = 5   # Conv3_8
-elif args.model_type == 'dense169':
-    model = Dense169_all_layer.Dense169()
-    layer_idx = 6  # Denseblock.2
-else:
-    raise Exception('Please check the model_type')
-
-
+# pdb.set_trace()
 if args.RN and args.DA:
     save_checkpoint_suffix = 'BIA+RN+DA'
 elif args.RN:
@@ -74,111 +41,148 @@ elif args.DA:
 else:
     save_checkpoint_suffix = 'BIA'  
 
-model = model.to(device)
-model.eval()
 
-# Input dimensions
-scale_size = 256
-img_size = 224
+# Normalize (0-1)
+eps = 10.0/255
 
-# Generator
-netG = GeneratorResnet().to(device)
+for domain in ['cifar10', 'cifar100', 'stl10', 'svhn', 'dcl_cub', 'dcl_car', 'dcl_air', 'imagenet','imagenet_incv3'][1:2]:
+    print('='*30, '{}'.format(domain), '='*30)  
+    if domain[:3] == 'dcl':
+        batch_size = 6 
+        if domain == 'dcl_cub':
+            numcls = 200
+        elif domain == 'dcl_car':
+            numcls = 196    
+        elif domain == 'dcl_air':
+            numcls = 100
+    elif domain == 'imagenet_incv3':
+        batch_size = 16 
+    elif domain == 'imagenet': 
+        batch_size = 32 
+        mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+        model_vgg16 = nn.Sequential(Normalize(mean,std),torchvision.models.vgg16(pretrained=True)).cuda().eval()
+        model_vgg19 = nn.Sequential(Normalize(mean,std),torchvision.models.vgg19(pretrained=True)).cuda().eval()
+        model_res50 = nn.Sequential(Normalize(mean,std),torchvision.models.resnet50(pretrained=True)).cuda().eval()
+        model_res152 = nn.Sequential(Normalize(mean,std),torchvision.models.resnet152(pretrained=True)).cuda().eval()
+        model_dense121 = nn.Sequential(Normalize(mean,std),torchvision.models.densenet121(pretrained=True)).cuda().eval()
+        model_dense169 = nn.Sequential(Normalize(mean,std),torchvision.models.densenet169(pretrained=True)).cuda().eval()
+    else:
+        batch_size = 128
 
-# Optimizer
-optimG = optim.Adam(netG.parameters(), lr=args.lr, betas=(0.5, 0.999))
+    if domain == 'imagenet':
+        ds_fetcher, is_imagenet = selector.select(domain)
+    elif domain[:3] == 'dcl':
+        model_res50, model_senet, model_seres101, ds_fetcher, is_imagenet = selector.select(domain)
+        acc_res50, clean_res50, acc_senet, clean_senet, acc_seres101, clean_seres101 = 0,0,0,0,0,0
+    else:
+        model_raw, ds_fetcher, is_imagenet = selector.select(domain)
 
-# Training Data
-data_transform = transforms.Compose([
-    transforms.Resize(scale_size),
-    transforms.CenterCrop(img_size),
-    transforms.ToTensor(),
-])
+    if domain[-5:] == 'incv3':
+        ds_val = ds_fetcher(batch_size=batch_size, input_size=299, train=False, val=True)
+        data_length = len(ds_fetcher(batch_size=1, train=False, val=True))
+    else:
+        ds_val = ds_fetcher(batch_size=batch_size, train=False, val=True)
+        data_length = len(ds_fetcher(batch_size=1, train=False, val=True))
 
-def default_normalize(t):
-    t[:, 0, :, :] = (t[:, 0, :, :] - 0.485) / 0.229
-    t[:, 1, :, :] = (t[:, 1, :, :] - 0.456) / 0.224
-    t[:, 2, :, :] = (t[:, 2, :, :] - 0.406) / 0.225
 
-    return t
+    print('data length: ', data_length)
+    clean_vgg16, clean_vgg19, clean_res50, clean_res152, clean_dense121, clean_dense169 = 0, 0, 0, 0, 0, 0
+    acc_vgg16, acc_vgg19, acc_res50, acc_res152, acc_dense121, acc_dense169 = 0, 0, 0, 0, 0, 0
+    clean, accuracy = 0, 0
+    
+    netG = load_gan(args, domain)
+    netG = nn.DataParallel(netG).cuda().eval()
 
-def normalize(t, mean, std):
-    t[:, 0, :, :] = (t[:, 0, :, :] - mean) / std
-    t[:, 1, :, :] = (t[:, 1, :, :] - mean) / std
-    t[:, 2, :, :] = (t[:, 2, :, :] - mean) / std
 
-    return t
+    for i, data_val in tqdm(enumerate(ds_val)):
+        img, label = data_val
 
-train_dir = args.train_dir
-train_set = datasets.ImageFolder(train_dir, data_transform)
-train_loader = torch.utils.data.DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True)
-train_size = len(train_set)
-print('Training data size:', train_size)
-
-# Loss
-criterion = nn.CrossEntropyLoss()
-
-# Training
-for epoch in range(args.epochs):
-    running_loss = 0
-    for i, (img, _) in enumerate(train_loader):
-        img = img.to(device)
-        netG.train()
-        optimG.zero_grad()
+        img =  Variable(torch.FloatTensor(img)).cuda()
+        label = Variable(torch.from_numpy(np.array(label)).long().cuda())
         adv = netG(img)
-
-        # Projection
+ 
         adv = torch.min(torch.max(adv, img - eps), img + eps)
         adv = torch.clamp(adv, 0.0, 1.0)
 
-        # Saving adversarial examples
-        flag = False
-        if i <= 1000:
-            if i % 100 == 0:
-                flag = True
-        else:
-            if i % 2000 == 0:
-                flag = True
-        if flag:
-            plt.subplot(121)
-            plt.imshow(img[0,...].permute(1,2,0).detach().cpu())
-            plt.axis('off')
-            plt.subplot(122)
-            plt.imshow(adv[0,...].permute(1,2,0).detach().cpu())
-            plt.axis('off')
-            save_path = 'output/{}'.format(args.model_type)
-            if not os.path.exists(save_path):
-                os.makedirs(save_path)
-            plt.savefig(os.path.join(save_path, '{}.png'.format(i)), bbox_inches='tight')
 
-        if args.RN:
-            mean = np.random.normal(0.50, 0.08)
-            std = np.random.normal(0.75, 0.08)
-            adv_out_slice = model(normalize(adv.clone(), mean, std))[layer_idx]
-            img_out_slice = model(normalize(img.clone(), mean, std))[layer_idx]
-        else:
-            adv_out_slice = model(default_normalize(adv.clone()))[layer_idx]
-            img_out_slice = model(default_normalize(img.clone()))[layer_idx]
+        with torch.no_grad():
+            if domain == 'imagenet':
+                clean_vgg16 += torch.sum(torch.argmax(model_vgg16(img), dim = 1) == label.cuda())
+                acc_vgg16 += torch.sum(torch.argmax(model_vgg16(adv), dim = 1) == label.cuda()) 
 
-        if args.DA:
-            attention = abs(torch.mean(img_out_slice, dim=1, keepdim=True)).detach()
-        else:
-            attention = torch.ones(adv_out_slice.shape).cuda()
+                clean_vgg19 += torch.sum(torch.argmax(model_vgg19(img), dim = 1) == label.cuda())
+                acc_vgg19 += torch.sum(torch.argmax(model_vgg19(adv), dim = 1) == label.cuda())
 
-        loss = torch.cosine_similarity((adv_out_slice*attention).reshape(adv_out_slice.shape[0], -1), 
-                            (img_out_slice*attention).reshape(img_out_slice.shape[0], -1)).mean()
-        loss.backward()
-        optimG.step()
+                clean_res50 += torch.sum(torch.argmax(model_res50(img), dim = 1) == label.cuda())
+                acc_res50 += torch.sum(torch.argmax(model_res50(adv), dim = 1) == label.cuda())
+                
+                clean_res152 += torch.sum(torch.argmax(model_res152(img), dim = 1) == label.cuda())
+                acc_res152 += torch.sum(torch.argmax(model_res152(adv), dim = 1) == label.cuda())
 
-        if i % 100 == 0:
-            print('Epoch: {0} \t Batch: {1} \t loss: {2:.5f}'.format(epoch, i, running_loss / 100))
-            running_loss = 0
-        running_loss += abs(loss.item())
+                clean_dense121 += torch.sum(torch.argmax(model_dense121(img), dim = 1) == label.cuda())
+                acc_dense121 += torch.sum(torch.argmax(model_dense121(adv), dim = 1) == label.cuda())
 
-        # One epoch 
-        if i % 80000 == 0 and i > 0:
-            save_checkpoint_dir = 'saved_models/{}'.format(args.model_type)
-            if not os.path.exists(save_checkpoint_dir):
-                os.makedirs(save_checkpoint_dir)
-            save_path = os.path.join(save_checkpoint_dir, 'netG_{}_{}.pth'.format(save_checkpoint_suffix, epoch))
-            torch.save(netG.state_dict(), save_path)
+                clean_dense169 += torch.sum(torch.argmax(model_dense169(img), dim = 1) == label.cuda())
+                acc_dense169 += torch.sum(torch.argmax(model_dense169(adv), dim = 1) == label.cuda())  
+
+            elif domain[:3] != 'dcl':
+                clean += torch.sum(torch.argmax(model_raw(img), dim = 1) == label.cuda())
+                accuracy += torch.sum(torch.argmax(model_raw(adv), dim = 1) == label.cuda())
+            else:
+                outputs = model_res50(adv)
+                outputs_clean = model_res50(img)
+                outputs_pred = outputs[0] + outputs[1][:,0:numcls] + outputs[1][:,numcls:2*numcls]
+                outputs_pred_clean = outputs_clean[0] + outputs_clean[1][:,0:numcls] + outputs_clean[1][:,numcls:2*numcls]
+                acc_res50 += torch.sum(torch.argmax(outputs_pred, dim = 1) == label.cuda())
+                clean_res50 += torch.sum(torch.argmax(outputs_pred_clean, dim = 1) == label.cuda())
+
+                outputs2 = model_senet(adv)
+                outputs_clean2 = model_senet(img)
+                outputs_pred2 = outputs2[0] + outputs2[1][:,0:numcls] + outputs2[1][:,numcls:2*numcls]
+                outputs_pred_clean2 = outputs_clean2[0] + outputs_clean2[1][:,0:numcls] + outputs_clean2[1][:,numcls:2*numcls]
+                acc_senet += torch.sum(torch.argmax(outputs_pred2, dim = 1) == label.cuda())
+                clean_senet += torch.sum(torch.argmax(outputs_pred_clean2, dim = 1) == label.cuda())
+
+                outputs3 = model_seres101(adv)
+                outputs_clean3 = model_seres101(img)
+                outputs_pred3 = outputs3[0] + outputs3[1][:,0:numcls] + outputs3[1][:,numcls:2*numcls]
+                outputs_pred_clean3 = outputs_clean3[0] + outputs_clean3[1][:,0:numcls] + outputs_clean3[1][:,numcls:2*numcls]
+                acc_seres101 += torch.sum(torch.argmax(outputs_pred3, dim = 1) == label.cuda())
+                clean_seres101 += torch.sum(torch.argmax(outputs_pred_clean3, dim = 1) == label.cuda())
+    
+
+    if domain == 'imagenet':
+        print('----------------vgg16----------------')
+        print(acc_vgg16 / data_length)
+        print(clean_vgg16 / data_length)
+        print('----------------vgg19----------------')
+        print(acc_vgg19 / data_length)
+        print(clean_vgg19 / data_length)
+        print('----------------res50----------------')
+        print(acc_res50 / data_length)
+        print(clean_res50 / data_length)      
+        print('----------------res152----------------')
+        print(acc_res152 / data_length)
+        print(clean_res152 / data_length)
+        print('----------------dense121----------------')
+        print(acc_dense121 / data_length)
+        print(clean_dense121 / data_length)
+        print('----------------dense169----------------')
+        print(acc_dense169 / data_length)
+        print(clean_dense169 / data_length)
+    elif domain[:3] == 'dcl':
+        print('----------------backbone:res50----------------')
+        print(acc_res50 / data_length)
+        print(clean_res50 / data_length)
+        print('----------------backbone:se-net----------------')
+        print(acc_senet / data_length)
+        print(clean_senet / data_length)
+        print('----------------backbone:se-res101----------------')
+        print(acc_seres101 / data_length)
+        print(clean_seres101 / data_length)
+
+    else:
+        print(accuracy / data_length)
+        print(clean / data_length)
+
 
