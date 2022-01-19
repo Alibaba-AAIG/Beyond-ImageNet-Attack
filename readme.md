@@ -20,7 +20,7 @@ In this paper, with only the knowledge of the ImageNet domain, we propose a Beyo
   - [ImageNet](http://www.image-net.org/) Training Set.
 
 - Download the testing dataset.
-  - [ImageNet](http://www.image-net.org/) Validation Set (我们提供val224和val299).
+  - [ImageNet](http://www.image-net.org/) Validation Set. We also provide precomputed imagenet validation dataset in 我们提供 (download it to `imagenet` folder and then run `convert.py`, thanks @[@aaron-xichen](https://github.com/aaron-xichen/pytorch-playground)).
   - [CUB-200-2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html)
   - [Stanford Cars](https://ai.stanford.edu/~jkrause/cars/car_dataset.html)
   - [FGVC AirCraft](https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/)
