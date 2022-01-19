@@ -13,16 +13,12 @@ import torchvision.transforms as transforms
 from utee import selector
 from tqdm import tqdm
 from utee.Normalize import Normalize
-from gaussian_smoothing import *
-####################################
 from loader_checkpoint import *
 os.environ["CUDA_VISIBLE_DEVICES"] = "1" 
 
-parser = argparse.ArgumentParser(description='Cross-Domain Transferability')
-parser.add_argument('--train_dir', default='imagenet', help='Generator Training Data: paintings, comics, ')
+parser = argparse.ArgumentParser(description='Transfer towards Black-box Domain')
 parser.add_argument('--epochs', type=int, default=0, help='Which Saving Instance to Evaluate')
 parser.add_argument('--model_type', type=str, default= 'vgg16',  help ='Model against GAN is trained: vgg16, vgg19, res152, dense169')
-parser.add_argument('--target', type=int, default=-1, help='-1 if untargeted')
 parser.add_argument('--eps', type=int, default=10, help='Perturbation Budget')
 parser.add_argument('--RN', type=lambda x: (str(x).lower() == 'true'), default=False, 
                     help='If true, activating the Random Normalization module in training phase')

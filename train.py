@@ -180,6 +180,6 @@ for epoch in range(args.epochs):
             save_checkpoint_dir = 'saved_models/{}'.format(args.model_type)
             if not os.path.exists(save_checkpoint_dir):
                 os.makedirs(save_checkpoint_dir)
-            save_path = os.path.join(save_checkpoint_dir, 'today_netG_{}_{}.pth'.format(save_checkpoint_suffix, epoch))
+            save_path = os.path.join(save_checkpoint_dir, 'netG_{}_{}.pth'.format(save_checkpoint_suffix, epoch))
             torch.save(netG.state_dict(), save_path)
 
