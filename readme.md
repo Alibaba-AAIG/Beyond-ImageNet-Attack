@@ -20,7 +20,7 @@ In this paper, with only the knowledge of the ImageNet domain, we propose a Beyo
   - [ImageNet](http://www.image-net.org/) Training Set.
 
 - Download the testing dataset.
-  - [ImageNet](http://www.image-net.org/) Validation Set. We also provide precomputed imagenet validation dataset in 我们提供 (download it to `imagenet` folder and then run `convert.py`, thanks @[@aaron-xichen](https://github.com/aaron-xichen/pytorch-playground)).
+  - [ImageNet](http://www.image-net.org/) Validation Set. We also provide precomputed imagenet validation dataset in [here](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/releases/download/untagged-3a66398a050dde87f6e4/val224_compressed.pkl) (download it to `imagenet` folder and then run `convert.py`, thanks @[@aaron-xichen](https://github.com/aaron-xichen/pytorch-playground)).
   - [CUB-200-2011](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html)
   - [Stanford Cars](https://ai.stanford.edu/~jkrause/cars/car_dataset.html)
   - [FGVC AirCraft](https://www.robots.ox.ac.uk/~vgg/data/fgvc-aircraft/)
@@ -30,7 +30,7 @@ Note: After downloading CUB-200-2011, Standford Cars and FGVC Aircraft, you shou
 
 ## Target model
 The checkpoint of target model should be put into `model` folder.
-- CUB-200-2011, Stanford Cars and FGVC AirCraft can be downloaded from （我们提供）......
+- CUB-200-2011, Stanford Cars and FGVC AirCraft can be downloaded from [here](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/releases/download/untagged-8edd869faec06544dccd/model.zip)
 - CIFAR-10, CIFAR-100, STL-10 and SVHN can be automatically downloaded 
 - ImageNet pre-trained models are available at [torchvision](https://pytorch.org/vision/stable/models.html) 
   
@@ -42,7 +42,7 @@ Adversarial generators are trained against following four ImageNet pre-trained m
 * ResNet152
 * DenseNet169
 
-After finishing training, the resulting generator will be put into `saved_models` folder. You can also download our pretrained-generator from ...... to `saved_models` folder.
+After finishing training, the resulting generator will be put into `saved_models` folder. You can also download our pretrained-generator from [here](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/releases/download/untagged-272d49eca20ef8891a03/saved_models.zip).
 
 ## Train
 Train the generator using vanilla BIA (RN: False, DA: False)
