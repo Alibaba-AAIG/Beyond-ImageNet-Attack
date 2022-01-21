@@ -57,8 +57,6 @@ Evaluate the performance of vanilla BIA (RN: False, DA: False)
 python eval.py --model_type vgg16 --RN False --DA False
 ```
 
-## Acknowledge
-Thank [@aaron-xichen](https://github.com/aaron-xichen/pytorch-playground) and [@Muzammal-Naseer](https://github.com/Muzammal-Naseer/Cross-Domain-Perturbations) for sharing their codes.
 
 ## Citing this work
 
@@ -78,3 +76,6 @@ If you find this work is useful in your research, please consider citing:
   year      = {2022}
 }
 ```
+
+## Acknowledge
+Thank [@aaron-xichen](https://github.com/aaron-xichen/pytorch-playground) and [@Muzammal-Naseer](https://github.com/Muzammal-Naseer/Cross-Domain-Perturbations) for sharing their codes.
