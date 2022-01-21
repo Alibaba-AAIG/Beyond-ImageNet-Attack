@@ -1,7 +1,7 @@
 # Beyond ImageNet Attack: Towards Crafting Adversarial Examples for Black-box Domains (ICLR 2022)
 
 This is the **Pytorch code** for our paper [Beyond ImageNet Attack: Towards Crafting Adversarial Examples for Black-box Domains](https://openreview.net/pdf?id=QkRV50TZyP)).
-In this paper, with only the knowledge of the ImageNet domain, we propose a Beyond ImageNet Attack (BIA) to investigate the transferability towards black-box domains (unknown classification tasks)
+In this paper, with only the knowledge of the ImageNet domain, we propose a Beyond ImageNet Attack (BIA) to investigate the transferability towards black-box domains (unknown classification tasks).
 
 ## Requirement
   - Python 3.7
@@ -31,8 +31,8 @@ Note: After downloading CUB-200-2011, Standford Cars and FGVC Aircraft, you shou
 ## Target model
 The checkpoint of target model should be put into `model` folder.
 - CUB-200-2011, Stanford Cars and FGVC AirCraft can be downloaded from [here](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/releases/download/untagged-8edd869faec06544dccd/model.zip).
-- CIFAR-10, CIFAR-100, STL-10 and SVHN can be automatically downloaded 
-- ImageNet pre-trained models are available at [torchvision](https://pytorch.org/vision/stable/models.html) 
+- CIFAR-10, CIFAR-100, STL-10 and SVHN can be automatically downloaded. 
+- ImageNet pre-trained models are available at [torchvision](https://pytorch.org/vision/stable/models.html). 
   
 ## Pretrained-Generators
 ![framework](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/blob/main/framework.png)
