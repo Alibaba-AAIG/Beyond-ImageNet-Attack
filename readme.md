@@ -1,6 +1,6 @@
 # Beyond ImageNet Attack: Towards Crafting Adversarial Examples for Black-box Domains (ICLR 2022)
 
-This is the **Pytorch code** for our paper [Beyond ImageNet Attack: Towards Crafting Adversarial Examples for Black-box Domains](http://arxiv.org/abs/2007.06765).
+This is the **Pytorch code** for our paper [Beyond ImageNet Attack: Towards Crafting Adversarial Examples for Black-box Domains](https://openreview.net/pdf?id=QkRV50TZyP)).
 In this paper, with only the knowledge of the ImageNet domain, we propose a Beyond ImageNet Attack (BIA) to investigate the transferability towards black-box domains (unknown classification tasks)
 
 ## Requirement
@@ -59,3 +59,22 @@ python eval.py --model_type vgg16 --RN False --DA False
 
 ## Acknowledge
 Thank [@aaron-xichen](https://github.com/aaron-xichen/pytorch-playground) and [@Muzammal-Naseer](https://github.com/Muzammal-Naseer/Cross-Domain-Perturbations) for sharing their codes.
+
+## Citing this work
+
+If you find this work is useful in your research, please consider citing:
+
+```
+@inproceedings{Zhang2022BIA,
+  author    = {Qilong Zhang and
+               Xiaodan Li and
+               Yuefeng Chen and
+               Jingkuan Song and
+               Lianli Gao and
+               Yuan He and
+               Hui Xue},
+  title     = {Beyond ImageNet Attack: Towards Crafting Adversarial Examples for Black-box Domains},
+  Booktitle = {International Conference on Learning Representations},
+  year      = {2022}
+}
+```
