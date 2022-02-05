@@ -42,7 +42,7 @@ Adversarial generators are trained against following four ImageNet pre-trained m
 * ResNet152
 * DenseNet169
 
-After finishing training, the resulting generator will be put into `saved_models` folder. You can also download our pretrained-generator from [here](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/releases/download/untagged-272d49eca20ef8891a03/saved_models.zip).
+After finishing training, the resulting generator will be put into `saved_models` folder. You can also download our pretrained-generator from [here](https://github.com/Alibaba-AAIG/Beyond-ImageNet-Attack/releases/download/pretrained_models/saved_models.zip).
 
 ## Train
 Train the generator using vanilla BIA (RN: False, DA: False)
