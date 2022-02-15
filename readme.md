@@ -78,4 +78,4 @@ If you find this work is useful in your research, please consider citing:
 ```
 
 ## Acknowledge
-Thank [@aaron-xichen](https://github.com/aaron-xichen/pytorch-playground) and [@Muzammal-Naseer](https://github.com/Muzammal-Naseer/Cross-Domain-Perturbations) for sharing their codes.
+Thank [@aaron-xichen](https://github.com/aaron-xichen/pytorch-playground), [@Muzammal-Naseer](https://github.com/Muzammal-Naseer/Cross-Domain-Perturbations) and [@JDAI-CV](https://github.com/JDAI-CV/DCL) for sharing their codes.
