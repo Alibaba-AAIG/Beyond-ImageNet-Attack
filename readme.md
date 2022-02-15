@@ -45,7 +45,7 @@ Adversarial generators are trained against following four ImageNet pre-trained m
 After finishing training, the resulting generator will be put into `saved_models` folder. You can also download our pretrained-generator from [here](https://github.com/Alibaba-AAIG/Beyond-ImageNet-Attack/releases/download/pretrained_models/saved_models.zip).
 
 ## Train
-Train the generator using vanilla BIA (RN: False, DA: False)
+Train the generator using vanilla BIA (RN: False, DA: False) against ImageNet pretrained VGG-16
 ```python
 python train.py --model_type vgg16 --train_dir your_imagenet_path --RN False --DA False
 ```
