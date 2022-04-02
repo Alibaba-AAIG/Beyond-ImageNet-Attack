@@ -13,7 +13,7 @@ In this paper, with only the knowledge of the ImageNet domain, we propose a Beyo
   - opencv-python 4.5.2.54 
   - joblib 0.14.1
   - Pillow 6.1
-  - pretrainedmodels
+  - pretrainedmodels 0.7.4
 
 ## Dataset
 ![images](https://github.com/qilong-zhang/Beyond-ImageNet-Attack/blob/main/images.png)
