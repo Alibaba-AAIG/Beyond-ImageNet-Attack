@@ -57,17 +57,17 @@ class LoadConfig(object):
         # please downloading the dataset first, and put them to the following path.
         if dataset == 'CUB':
             self.dataset = dataset
-            self.rawdata_root = '/mnt/hdd1/zhangqilong/CUB_200_2011/images'
+            self.rawdata_root = 'your_CUB_path'
             self.anno_root = 'DCL_finegrained/datasets/CUB'
             self.numcls = 200
         elif dataset == 'STCAR':
             self.dataset = dataset
-            self.rawdata_root = '/mnt/hdd1/zhangqilong/Cars/car_ims'
+            self.rawdata_root = 'your_CARS_path'
             self.anno_root = 'DCL_finegrained/datasets/STCAR'
             self.numcls = 196
         elif dataset == 'AIR':
             self.dataset = dataset
-            self.rawdata_root = '/mnt/hdd1/zhangqilong/fgvc-aircraft-2013b/data/images'
+            self.rawdata_root = 'your_AIR_path'
             self.anno_root = 'DCL_finegrained/datasets/AIR'
             self.numcls = 100
         else:
